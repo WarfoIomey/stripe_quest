@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>Заказ #{{ order.id }}</h2>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th>Кол-во</th>
+                <th>Сумма</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for oi in order.order_items.all %}
+                <tr>
+                    <td>{{ oi.item.name }}</td>
+                    <td>{{ oi.item.price|floatformat:2 }} {{ oi.item.currency }}</td>
+                    <td>{{ oi.quantity }}</td>
+                    <td>{{ oi.item.price|floatformat:2 }} {{ oi.item.currency }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+      <button 
+        class="btn btn-primary" 
+        data-order-id="{{ order.id }}"
+        onclick="handleBuyClick(this)"
+      >
+        Оплатить заказ
+      </button>
+    </div>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe('{{ stripe_public_key }}');
+    async function handleBuyClick(button) {
+    const orderId = button.dataset.orderId;
+    button.disabled = true;
+    button.textContent = 'Loading...';
+    try {
+        const response = await fetch(`/buy-order/${orderId}/`);
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to create checkout session');
+        }
+        if (!data.session_id) {
+            throw new Error('No session ID returned');
+        }
+        const result = await stripe.redirectToCheckout({
+            sessionId: data.session_id
+        });
+        if (result.error) {
+            throw new Error(result.error.message);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Payment error: ' + error.message);
+        button.disabled = false;
+        button.textContent = 'Buy';
+    }
+}
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}
