@@ -1,4 +1,5 @@
 # STRIPE_QUEST
+Задание доступно по ссылке (работает только с VPN): https://stripe-quest.onrender.com/item/1/ 
 Выполненые задания
 1) Реализовать Django + Stripe API бэкенд со следующим функционалом и условиями:
  - Django Модель Item с полями (name, description, price) 
