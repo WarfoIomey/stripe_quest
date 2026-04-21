@@ -1,0 +1,48 @@
+# render.yaml
+services:
+  - type: web
+    name: stripe_quest
+    runtime: docker
+    repo: https://github.com/WarfoIomey/stripe_quest.git
+    region: frankfurt
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: .onrender.com,localhost,127.0.0.1
+      - key: DB_HOST
+        fromDatabase:
+          name: stripe-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: stripe-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: stripe-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: stripe-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: stripe-db
+          property: password
+      - key: STRIPE_KEY
+        sync: false
+      - key: PUBLIC_KEY_STRIPE
+        sync: false
+      - key: STRIPE_CURRENCY
+        value: usd
+
+databases:
+  - name: stripe-db
+    plan: free
+    region: frankfurt
+    postgresMajorVersion: 15
